@@ -24,6 +24,7 @@ function SetupMenu()
     currentMods.pearlescentColor = pearlescentColor
     currentMods.wheelColor = wheelColor
     
+    exports['mythic_menu']:DestroyMenus()
     local menu = exports['mythic_menu']:CreateMenu('Los Santos Customs', 'Modify Your Vehicle', nil, 'ExitLSCustoms')
 
     if IsVehicleDamaged(veh) then
