@@ -19,6 +19,9 @@ end
 
 function DestroyMenus()
     menus = {}
+    SendNUIMessage({
+        action = "destroyMenus"
+    })
 end
 
     
@@ -128,6 +131,7 @@ RegisterNUICallback("CloseUI", function(data, cb)
     PlaySoundFrontend(-1, "QUIT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
     SetNuiFocus(false, false)
     isMenuOpen = false
+    menus = {}
 end)
 
 RegisterNUICallback("CloseCb", function(data, cb)

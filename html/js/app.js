@@ -29,69 +29,10 @@ window.addEventListener("message", function (event) {
         }
         
         $(menus[(menus.length - 1)]).fadeIn();
-    } else if (event.data.action == "testMenu") {
-        isMenuOpen = false;
-        setTimeout(function() {
-            menus.push($('.menu'));
-            let things = []
-            for(let i = 1; i <= 5; i++) {
-                let buttons = []
-                for (let j = 0; j < 50; j++) {
-                    switch (i) {
-                        case 1:
-                            buttons.push({
-                                type: 1,
-                                label: 'Type 1',
-                                data: "LOL"
-                            });
-                            break;
-                        case 2:
-                            buttons.push({
-                                type: 2,
-                                label: 'Type 2',
-                                max: Math.ceil(Math.random() * 100),
-                                data: "LOL"
-                            });
-                            break;
-                        case 4:
-                            buttons.push({
-                                type: 4,
-                                label: 'Type 4',
-                                right: '$500',
-                                data: "LOL"
-                            });
-                            break;
-                        case 5:
-                            buttons.push({
-                                type: 5,
-                                label: 'Type 5',
-                                activate: false,
-                                data: "LOL"
-                            });
-                            break;
-                    }
-                }
-        
-                things.push({
-                    type: 0,
-                    label: 'Type ' + i,
-                    data: {
-                        title: "CUNT",
-                        subtitle: "Ayyyyye",
-                        buttons: buttons
-                    }
-                });
-        
-            }
-        
-            let stuff = {
-                title: "Title YAY",
-                subtitle: "Sub Title WOOT",
-                buttons: things
-            }
-            setupItems(stuff);
-            $(menus[(menus.length - 1)]).fadeIn();
-        }, 200);
+    } else if (event.data.action == "destroyMenus") {
+        menus = new Array();
+        menuData = new Array();
+        calling_resource = null;
     }
 });
 
@@ -576,6 +517,7 @@ function CloseUI() {
     }
 
     $.post('http://mythic_menu/CloseUI', JSON.stringify({}));
-    menus = [];
+    menus = new Array();
+    menuData = new Array();
     calling_resource = null;
 }
