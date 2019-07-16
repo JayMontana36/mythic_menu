@@ -81,23 +81,19 @@ function AddSubMenuBack(index, label)
     table.insert(menus[index].buttons, {
         type = -1,
         label = label
-    }) 
+    })
 end
 
 function OpenMenu(resource)
-    Citizen.CreateThread(function()
-        Citizen.Wait(100)
-    
-        SendNUIMessage({
-            action = "display",
-            resource = resource,
-            data = menus
-        })
+    SendNUIMessage({
+        action = "display",
+        resource = resource,
+        data = menus
+    })
 
-        SetNuiFocus(true, false)
-        DisableControls()
-        isMenuOpen = true
-    end)
+    SetNuiFocus(true, false)
+    DisableControls()
+    isMenuOpen = true
 end
 
 function DisableControls()
@@ -123,20 +119,20 @@ function DisableControls()
     end)
 end
 
-RegisterNUICallback("GetSubMenu", function(data, cb)
-    cb(menus[data.index])
-end)
-
 RegisterNUICallback("CloseUI", function(data, cb)
     PlaySoundFrontend(-1, "QUIT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
     SetNuiFocus(false, false)
     isMenuOpen = false
     menus = {}
+    SendNUIMessage({
+        action = "destroyMenus"
+    })
+    cb('ok')
 end)
 
 RegisterNUICallback("CloseCb", function(data, cb)
-    cb('ok')
     TriggerEvent(data.resource .. ':client:' .. data.callback)
+    cb('ok')
 end)
 
 RegisterNUICallback("SelectItem", function(data, cb)
@@ -144,31 +140,36 @@ RegisterNUICallback("SelectItem", function(data, cb)
 end)
 
 RegisterNUICallback("SlideValueChange", function(data, cb)
-    cb('ok')
     TriggerEvent(data.resource .. ':client:' .. data.callback, data.data, data.index)
+    cb('ok')
 end)
 
 RegisterNUICallback("MenuOptionChange", function(data, cb)
-    cb('ok')
     TriggerEvent(data.resource .. ':client:' .. data.callback, data.data)
+    cb('ok')
 end)
 
 RegisterNUICallback("MenuUpDown", function(data, cb)
     PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    cb('ok')
 end)
 
 RegisterNUICallback("MenuSelect", function(data, cb)
     PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    cb('ok')
 end)
 
 RegisterNUICallback("MenuSelectDisabled", function(data, cb)
     PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    cb('ok')
 end)
 
 RegisterNUICallback("MenuSlideChange", function(data, cb)
     PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    cb('ok')
 end)
 
 RegisterNUICallback("MenuBack", function(data, cb)
     PlaySoundFrontend(-1, "CANCEL", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+    cb('ok')
 end)

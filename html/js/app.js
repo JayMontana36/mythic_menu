@@ -1,6 +1,5 @@
-var menus = [];
-var menuData = [];
-var selIndices = [];
+var menus = new Array();
+var menuData = new Array();
 var isMenuOpen = false;
 var calling_resource = null;
 
@@ -8,19 +7,12 @@ window.addEventListener("message", function (event) {
     if (event.data.action == "display") {
         isMenuOpen = false;
 
-        if (menus.length > 1) {
-            for (let i = menus.length - 1; i > 0; i--) {
-                $(menus[i]).remove();
-            }
-        
-            $(menus[(menus.length - 1)]).fadeOut();
-            menus = [];
-        }
-
         calling_resource = event.data.resource;
         menuData = event.data.data;
 
-        menus.push($('.menu'));
+        let menuElement = $('.templates .menu').clone();
+        $('.menus').append($(menuElement));
+        menus.push($(menuElement));
 
         setupItems(menuData[0]);
 
@@ -28,8 +20,10 @@ window.addEventListener("message", function (event) {
             $(menus[(menus.length - 1)]).data('close', menuData[0].closeCb);
         }
         
-        $(menus[(menus.length - 1)]).fadeIn();
+        $(menus[(menus.length - 1)]).show();
     } else if (event.data.action == "destroyMenus") {
+        $('.menus').html('');
+
         menus = new Array();
         menuData = new Array();
         calling_resource = null;
@@ -37,7 +31,10 @@ window.addEventListener("message", function (event) {
 });
 
 /*$(document).ready(function() {
-    menus.push($('.menu'));
+    let menuElement = $('.templates .menu').clone();
+    $('.menus').append($(menuElement));
+    menus.push($(menuElement));
+
     let things = []
     for(let i = 1; i <= 50; i++) {
         let buttons = []
@@ -95,70 +92,50 @@ window.addEventListener("message", function (event) {
         buttons: things
     }
     setupItems(stuff);
-    $(menus[(menus.length - 1)]).fadeIn();
+    $(menus[(menus.length - 1)]).show();
 });*/
 
-$(document).ready(function () {
-    $("body").on("keyup", function (event) {
-        event.preventDefault();
-        /*if(event.keyCode === 40) {
-            if (isMenuOpen) {
-                MoveDown();
-            }
-        } else if (event.keyCode === 38) {
-            if (isMenuOpen) {
-                MoveUp();
-            }
-        } else if (event.keyCode === 37) {
-            if (isMenuOpen) {
-                DoLeftAction();
-            }
-        } else if (event.keyCode === 39) {
-            if (isMenuOpen) {
-                DoRightAction();
-            }
-        } else*/ if (event.keyCode === 13) {
-            if (isMenuOpen) {
-                SelectItem();
-            }
-        } else if (event.keyCode === 8) {
-            if (isMenuOpen) {
-                GoBack();
-            }
-        } else if (event.keyCode === 27) {
-            if (isMenuOpen) {
-                CloseUI();
-            }
+$("body").on("keyup", function (event) {
+    event.preventDefault();
+    if (event.keyCode === 13) {
+        if (isMenuOpen) {
+            SelectItem();
         }
-    });
+    } else if (event.keyCode === 8) {
+        if (isMenuOpen) {
+            GoBack();
+        }
+    } else if (event.keyCode === 27) {
+        if (isMenuOpen) {
+            CloseUI();
+        }
+    }
 });
 
-$(document).ready(function() {
-    $("body").on("keydown", function(event) {
-        if (event.keyCode === 32) {
-            event.preventDefault();
-        } else if (event.keyCode === 37) {
-            event.preventDefault();
-            if (isMenuOpen) {
-                setInterval(DoLeftAction(), 1000);
-            }
-        } else if (event.keyCode === 39) {
-            event.preventDefault();
-            if (isMenuOpen) {
-                setInterval(DoRightAction(), 1000);
-            }
-        } else if(event.keyCode === 40) {
-            event.preventDefault();
-            if (isMenuOpen) {
-                setInterval(MoveDown(), 1000);
-            }
-        } else if (event.keyCode === 38) {
-            event.preventDefault();
-            if (isMenuOpen) {
-                setInterval(MoveUp(), 1000);
-            }
+$("body").on("keydown", function(event) {
+    if (event.keyCode === 32) {
+        event.preventDefault();
+    } else if (event.keyCode === 37) {
+        event.preventDefault();
+        if (isMenuOpen) {
+            setInterval(DoLeftAction(), 1000);
         }
-    });
+    } else if (event.keyCode === 39) {
+        event.preventDefault();
+        if (isMenuOpen) {
+            setInterval(DoRightAction(), 1000);
+        }
+    } else if(event.keyCode === 40) {
+        event.preventDefault();
+        if (isMenuOpen) {
+            setInterval(MoveDown(), 1000);
+        }
+    } else if (event.keyCode === 38) {
+        event.preventDefault();
+        if (isMenuOpen) {
+            setInterval(MoveUp(), 1000);
+        }
+    }
 });
 
 function setupItems(items) {
@@ -269,8 +246,7 @@ function setupItems(items) {
 function MoveUp() {
     $.post('http://mythic_menu/MenuUpDown', JSON.stringify({}));
 
-    let possible = $(menus[(menus.length - 1)]).find(".menu-button").not('.disabled');
-    if (possible.length < 2) { return; }
+    if ($(menus[(menus.length - 1)]).find(".menu-button").not('.disabled').length < 2) { return; }
 
     let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
     let newActive = $(menus[(menus.length - 1)]).find(".menu-button.active").prev('.menu-button');
@@ -293,7 +269,6 @@ function MoveUp() {
     } else {
         newActive = $(menus[(menus.length - 1)]).find('.menu-button:last-child');
 
-        let currIndex = +$(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html();
         $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(+$(menus[(menus.length - 1)]).find('.menu-sub-header .max-index').html());
 
         $(newActive).addClass('active');
@@ -315,18 +290,19 @@ function MoveUp() {
             callback: optionChangeCb
         }));
     }
+
+    curActive = null;
+    newActive = null;
+    optionChangeCb = null;
 }
 
 function MoveDown() {
     $.post('http://mythic_menu/MenuUpDown', JSON.stringify({}));
-
-    let possible = $(menus[(menus.length - 1)]).find(".menu-button").not('.disabled');
-    if (possible.length < 2) { return; }
+    if ($(menus[(menus.length - 1)]).find(".menu-button").not('.disabled').length < 2) { return; }
 
     let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
     let newActive = $(menus[(menus.length - 1)]).find(".menu-button.active").next('.menu-button');
     
-
     let optionChangeCb = $(menus[(menus.length - 1)]).data('optionChange');
 
     if (newActive.length > 0) {
@@ -344,8 +320,7 @@ function MoveDown() {
     } else {
         newActive = $(menus[(menus.length - 1)]).find('.menu-button:first-child');
 
-    let currIndex = +$(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html();
-    $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(1);
+        $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(1);
         $(newActive).addClass('active');
         $(curActive).removeClass('active');
 
@@ -365,6 +340,10 @@ function MoveDown() {
             callback: optionChangeCb
         }));
     }
+
+    curActive = null;
+    newActive = null;
+    optionChangeCb = null;
 }
 
 function DoLeftAction() {
@@ -439,9 +418,8 @@ function SelectItem() {
         GoBack();
     } else if (type === 0) {
         menus.push($('.sub-menu.template').clone());
-        $('body').append(menus[(menus.length - 1)]);
+        $('.menus').append(menus[(menus.length - 1)]);
 
-        
         if (menuData[0].closeCb != null) {
             $(menus[(menus.length - 1)]).data('close', menuData[0].closeCb);
         }
@@ -502,13 +480,7 @@ function GoBack() {
 }
 
 function CloseUI() {
-    for (let i = menus.length - 1; i > 0; i--) {
-        $(menus[i]).remove();
-    }
-
-    $(menus[(menus.length - 1)]).fadeOut();
     let closeCb = $(menus[(menus.length - 1)]).data('close');
-
     if (closeCb != null) {
         $.post('http://mythic_menu/CloseCb', JSON.stringify({
             resource: calling_resource,
@@ -516,7 +488,9 @@ function CloseUI() {
         }));
     }
 
+    $('.menus').html('');
     $.post('http://mythic_menu/CloseUI', JSON.stringify({}));
+
     menus = new Array();
     menuData = new Array();
     calling_resource = null;

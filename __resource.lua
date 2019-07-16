@@ -25,12 +25,8 @@ files {
     'html/css/style.css',
     'html/js/app.js',
 
-    'html/libs/jquery-ui.min.css',
     'html/libs/bootstrap.min.css',
     'html/libs/all.min.css',
     'html/libs/jquery.min.js',
-    'html/libs/jquery-ui.min.js',
-    'html/libs/bootstrap.min.js',
-    'html/libs/popper.min.js',
     'html/libs/all.min.js',
 }
