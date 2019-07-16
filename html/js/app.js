@@ -1,0 +1,581 @@
+var menus = [];
+var menuData = [];
+var selIndices = [];
+var isMenuOpen = false;
+var calling_resource = null;
+
+window.addEventListener("message", function (event) {
+    if (event.data.action == "display") {
+        isMenuOpen = false;
+
+        if (menus.length > 1) {
+            for (let i = menus.length - 1; i > 0; i--) {
+                $(menus[i]).remove();
+            }
+        
+            $(menus[(menus.length - 1)]).fadeOut();
+            menus = [];
+        }
+
+        calling_resource = event.data.resource;
+        menuData = event.data.data;
+
+        menus.push($('.menu'));
+
+        setupItems(menuData[0]);
+
+        if (menuData[0].closeCb != null) {
+            $(menus[(menus.length - 1)]).data('close', menuData[0].closeCb);
+        }
+        
+        $(menus[(menus.length - 1)]).fadeIn();
+    } else if (event.data.action == "testMenu") {
+        isMenuOpen = false;
+        setTimeout(function() {
+            menus.push($('.menu'));
+            let things = []
+            for(let i = 1; i <= 5; i++) {
+                let buttons = []
+                for (let j = 0; j < 50; j++) {
+                    switch (i) {
+                        case 1:
+                            buttons.push({
+                                type: 1,
+                                label: 'Type 1',
+                                data: "LOL"
+                            });
+                            break;
+                        case 2:
+                            buttons.push({
+                                type: 2,
+                                label: 'Type 2',
+                                max: Math.ceil(Math.random() * 100),
+                                data: "LOL"
+                            });
+                            break;
+                        case 4:
+                            buttons.push({
+                                type: 4,
+                                label: 'Type 4',
+                                right: '$500',
+                                data: "LOL"
+                            });
+                            break;
+                        case 5:
+                            buttons.push({
+                                type: 5,
+                                label: 'Type 5',
+                                activate: false,
+                                data: "LOL"
+                            });
+                            break;
+                    }
+                }
+        
+                things.push({
+                    type: 0,
+                    label: 'Type ' + i,
+                    data: {
+                        title: "CUNT",
+                        subtitle: "Ayyyyye",
+                        buttons: buttons
+                    }
+                });
+        
+            }
+        
+            let stuff = {
+                title: "Title YAY",
+                subtitle: "Sub Title WOOT",
+                buttons: things
+            }
+            setupItems(stuff);
+            $(menus[(menus.length - 1)]).fadeIn();
+        }, 200);
+    }
+});
+
+/*$(document).ready(function() {
+    menus.push($('.menu'));
+    let things = []
+    for(let i = 1; i <= 50; i++) {
+        let buttons = []
+        for (let j = 0; j < 25; j++) {
+            switch (i) {
+                case 1:
+                    buttons.push({
+                        type: 1,
+                        label: 'Type 1',
+                        data: "LOL"
+                    });
+                    break;
+                case 2:
+                    buttons.push({
+                        type: 2,
+                        label: 'Type 2',
+                        max: Math.ceil(Math.random() * 100),
+                        data: "LOL"
+                    });
+                    break;
+                case 4:
+                    buttons.push({
+                        type: 4,
+                        label: 'Type 4',
+                        right: '$500',
+                        data: "LOL"
+                    });
+                    break;
+                case 5:
+                    buttons.push({
+                        type: 5,
+                        label: 'Type 5',
+                        activate: false,
+                        data: "LOL"
+                    });
+                    break;
+            }
+        }
+
+        things.push({
+            type: 0,
+            label: 'Type ' + i,
+            data: {
+                title: "CUNT",
+                subtitle: "Ayyyyye",
+                buttons: buttons
+            }
+        });
+
+    }
+
+    let stuff = {
+        title: "Title YAY",
+        subtitle: "Sub Title WOOT",
+        buttons: things
+    }
+    setupItems(stuff);
+    $(menus[(menus.length - 1)]).fadeIn();
+});*/
+
+$(document).ready(function () {
+    $("body").on("keyup", function (event) {
+        event.preventDefault();
+        /*if(event.keyCode === 40) {
+            if (isMenuOpen) {
+                MoveDown();
+            }
+        } else if (event.keyCode === 38) {
+            if (isMenuOpen) {
+                MoveUp();
+            }
+        } else if (event.keyCode === 37) {
+            if (isMenuOpen) {
+                DoLeftAction();
+            }
+        } else if (event.keyCode === 39) {
+            if (isMenuOpen) {
+                DoRightAction();
+            }
+        } else*/ if (event.keyCode === 13) {
+            if (isMenuOpen) {
+                SelectItem();
+            }
+        } else if (event.keyCode === 8) {
+            if (isMenuOpen) {
+                GoBack();
+            }
+        } else if (event.keyCode === 27) {
+            if (isMenuOpen) {
+                CloseUI();
+            }
+        }
+    });
+});
+
+$(document).ready(function() {
+    $("body").on("keydown", function(event) {
+        if (event.keyCode === 32) {
+            event.preventDefault();
+        } else if (event.keyCode === 37) {
+            event.preventDefault();
+            if (isMenuOpen) {
+                setInterval(DoLeftAction(), 1000);
+            }
+        } else if (event.keyCode === 39) {
+            event.preventDefault();
+            if (isMenuOpen) {
+                setInterval(DoRightAction(), 1000);
+            }
+        } else if(event.keyCode === 40) {
+            event.preventDefault();
+            if (isMenuOpen) {
+                setInterval(MoveDown(), 1000);
+            }
+        } else if (event.keyCode === 38) {
+            event.preventDefault();
+            if (isMenuOpen) {
+                setInterval(MoveUp(), 1000);
+            }
+        }
+    });
+});
+
+function setupItems(items) {
+    $(menus[(menus.length - 1)]).find('.menu-container').html('');
+    $(menus[(menus.length - 1)]).find('.menu-header').html(items.title);
+    $(menus[(menus.length - 1)]).find('.menu-sub-header .sub-title').html(items.subtitle);
+    $(menus[(menus.length - 1)]).find('.menu-sub-header .max-index').html(items.buttons.length);
+    $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(1);
+
+    if (items.optionCb != null) {
+        $(menus[(menus.length - 1)]).data('optionChange', items.optionCb);
+    }
+
+    if (items.closeCb != null) {
+        $(menus[(menus.length - 1)]).data('close', items.closeCb);
+    }
+
+    $.each(items.buttons, function(index, item) {
+        let element = null;
+
+        switch(item.type) {
+            // Slider
+            case 2:
+                element = $('.templates .slider.template').clone();
+                $(element).find('.left').html(item.label);
+                $(element).find('.max-index').html(item.max);
+                $(element).find('input').attr('max', (item.max));
+                break;
+            // Progress Bar
+            case 3:
+                element = $('.templates .standard.template').clone();
+                $(element).html(item.label);
+                break;
+            // Submenu
+            case 4:
+                element = $('.templates .advanced.template').clone();
+                $(element).find('.left').html(item.label);
+                if (item.right != null) {
+                    $(element).find('.right').html(item.right);
+                }
+                break;
+            case 5:
+                    element = $('.templates .check.template').clone();
+                    $(element).find('.left').html(item.label);
+                    if (!item.active) {
+                        $(element).find('.right').html('');
+                    } else {
+                        $(element).find('.right').html('<i class="fas fa-check-circle"></i>');
+                    }
+                    break;
+            case 0:
+            // Standard Button
+            case 1:
+            case -1:
+            default:
+                element = $('.templates .standard.template').clone();
+                $(element).html(item.label);
+                break;
+        }
+
+        $(menus[(menus.length - 1)]).find('.menu-container').append(element);
+        $(element).data('type', item.type);
+
+        if (item.data != null) {
+            if (item.type == 0) {
+                $(element).data('data', menuData[(item.data.index - 1)]);
+            } else {
+                $(element).data('data', item.data);
+            }
+        }
+
+        if (item.select != null) {
+            $(element).data('select', item.select);
+        }
+
+        if (item.slideChange != null) {
+            $(element).data('slideChange', item.slideChange);
+        }
+
+        if (item.disabled) {
+            $(element).addClass('disabled');
+        }
+
+        $(element).addClass('menu-button');
+        $(element).attr('tabindex', (index + 1));
+
+        if (index === 0) { $(element).addClass('active'); }
+
+        $(element).removeClass('template');
+    });
+
+    $(menus[(menus.length - 1)]).find('.menu-button.active').focus();
+    $(menus[(menus.length - 1)]).find('.menu-container').animate({ scrollTop: 0 }, "fast");
+
+    if (items.optionCb != null) {
+        let data = $(menus[(menus.length - 1)]).find('.menu-button.active').data('data');
+
+        $.post('http://mythic_menu/MenuOptionChange', JSON.stringify({
+            data: data,
+            resource: calling_resource,
+            callback: items.optionCb
+        }));
+    }
+
+    isMenuOpen = true;
+}
+
+function MoveUp() {
+    $.post('http://mythic_menu/MenuUpDown', JSON.stringify({}));
+
+    let possible = $(menus[(menus.length - 1)]).find(".menu-button").not('.disabled');
+    if (possible.length < 2) { return; }
+
+    let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
+    let newActive = $(menus[(menus.length - 1)]).find(".menu-button.active").prev('.menu-button');
+
+
+    let optionChangeCb = $(menus[(menus.length - 1)]).data('optionChange');
+
+    if (newActive.length > 0) {
+        $(newActive).addClass('active');
+        $(curActive).removeClass('active');
+
+        let currIndex = +$(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html();
+        $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(currIndex - 1);
+
+        if ($(newActive).data('type') == 2) {
+            $(newActive).find('input').focus();
+        } else {
+            $(newActive).focus();
+        }
+    } else {
+        newActive = $(menus[(menus.length - 1)]).find('.menu-button:last-child');
+
+        let currIndex = +$(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html();
+        $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(+$(menus[(menus.length - 1)]).find('.menu-sub-header .max-index').html());
+
+        $(newActive).addClass('active');
+        $(curActive).removeClass('active');
+
+        if ($(newActive).data('type') == 2) {
+            $(newActive).find('input').focus();
+        } else {
+            $(newActive).focus();
+        }
+    }
+
+    if (optionChangeCb != null) {
+        let data = $(newActive).data('data');
+
+        $.post('http://mythic_menu/MenuOptionChange', JSON.stringify({
+            data: data,
+            resource: calling_resource,
+            callback: optionChangeCb
+        }));
+    }
+}
+
+function MoveDown() {
+    $.post('http://mythic_menu/MenuUpDown', JSON.stringify({}));
+
+    let possible = $(menus[(menus.length - 1)]).find(".menu-button").not('.disabled');
+    if (possible.length < 2) { return; }
+
+    let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
+    let newActive = $(menus[(menus.length - 1)]).find(".menu-button.active").next('.menu-button');
+    
+
+    let optionChangeCb = $(menus[(menus.length - 1)]).data('optionChange');
+
+    if (newActive.length > 0) {
+        $(newActive).addClass('active');
+        $(curActive).removeClass('active');
+
+        let currIndex = +$(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html();
+        $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(currIndex + 1);
+
+        if ($(newActive).data('type') == 2) {
+            $(newActive).find('input').focus();
+        } else {
+            $(newActive).focus();
+        }
+    } else {
+        newActive = $(menus[(menus.length - 1)]).find('.menu-button:first-child');
+
+    let currIndex = +$(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html();
+    $(menus[(menus.length - 1)]).find('.menu-sub-header .current-index').html(1);
+        $(newActive).addClass('active');
+        $(curActive).removeClass('active');
+
+        if ($(newActive).data('type') == 2) {
+            $(newActive).find('input').focus();
+        } else {
+            $(newActive).focus();
+        }
+    }
+
+    if (optionChangeCb != null) {
+        let data = $(newActive).data('data');
+
+        $.post('http://mythic_menu/MenuOptionChange', JSON.stringify({
+            data: data,
+            resource: calling_resource,
+            callback: optionChangeCb
+        }));
+    }
+}
+
+function DoLeftAction() {
+    let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
+
+    if ($(curActive).hasClass('slider')) {
+        let value = $(curActive).find('input').val();
+        let data = $(curActive).data('data');
+        let valChangeCb = $(curActive).data('slideChange');
+
+        if (value === "1") {
+            $(curActive).find('input').val($(curActive).find('input').attr('max'));
+            $.post('http://mythic_menu/MenuSlideChange', JSON.stringify({}));
+            $(curActive).find('.curr-index').html($(curActive).find('input').val());
+        } else {
+            $(curActive).find('input').val(value - 1);
+            $.post('http://mythic_menu/MenuSlideChange', JSON.stringify({}));
+            $(curActive).find('.curr-index').html($(curActive).find('input').val());
+        }
+
+        $.post('http://mythic_menu/SlideValueChange', JSON.stringify({
+            data: data,
+            index: +$(curActive).find('input').val(),
+            resource: calling_resource,
+            callback: valChangeCb
+        }));
+    }
+}
+
+function DoRightAction() {
+    let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
+
+    if ($(curActive).hasClass('slider')) {
+        let value = $(curActive).find('input').val();
+        let data = $(curActive).data('data');
+        let valChangeCb = $(curActive).data('slideChange');
+
+        if (value === $(curActive).find('input').attr('max')) {
+            $(curActive).find('input').val(1);
+            $.post('http://mythic_menu/MenuSlideChange', JSON.stringify({}));
+            $(curActive).find('.curr-index').html($(curActive).find('input').val());
+        } else {
+            $(curActive).find('input').val(+value + 1);
+            $.post('http://mythic_menu/MenuSlideChange', JSON.stringify({}));
+            $(curActive).find('.curr-index').html($(curActive).find('input').val());
+        }
+
+        $.post('http://mythic_menu/SlideValueChange', JSON.stringify({
+            data: data,
+            index: +$(curActive).find('input').val(),
+            resource: calling_resource,
+            callback: valChangeCb
+        }));
+    }
+}
+
+function SelectItem() {
+    let active = $(menus[(menus.length - 1)]).find(".menu-button.active");
+
+    if ($(active).hasClass('disabled')) {
+        $.post('http://mythic_menu/MenuSelectDisabled', JSON.stringify({}));
+        return
+    } else {
+        $.post('http://mythic_menu/MenuSelect', JSON.stringify({}));
+    }
+
+    let type = $(active).data('type');
+    let selectCb = $(active).data('select');
+    let data = $(active).data('data');
+    
+    if (type === -1) {
+        GoBack();
+    } else if (type === 0) {
+        menus.push($('.sub-menu.template').clone());
+        $('body').append(menus[(menus.length - 1)]);
+
+        
+        if (menuData[0].closeCb != null) {
+            $(menus[(menus.length - 1)]).data('close', menuData[0].closeCb);
+        }
+
+        setupItems(data);
+
+        $(menus[(menus.length - 2)]).hide()
+        $(menus[(menus.length - 1)]).removeClass('template');
+        $(menus[(menus.length - 1)]).show()
+    } else if (type === 5) {
+        $(active).find('.right').html('<i class="fas fa-check-circle"></i>');
+
+        $(menus[(menus.length - 1)]).find('.check').each(function() {
+            if (!$(this).hasClass('active')) {
+                $(this).find('.right').html('');
+            }
+        });
+    }
+
+
+    if (!(type === 0) && !(type === -1)) {
+        if (selectCb == null) { return }
+        isMenuOpen = false;
+
+        $.post('http://mythic_menu/SelectItem', JSON.stringify({
+            data: data,
+            resource: calling_resource,
+            callback: selectCb
+        }), function(close) {
+            if (close) {
+                CloseUI();
+            } else {
+                isMenuOpen = true;
+            }
+        });
+    }
+}
+
+function GoBack() {
+    if (menus.length === 1) {
+        CloseUI();
+    } else {
+        $.post('http://mythic_menu/MenuBack', JSON.stringify({}));
+
+        let close = $(menus[(menus.length - 1)]).data('close');
+        if (close != null) {
+            $.post('http://mythic_menu/CloseCb', JSON.stringify({
+                resource: calling_resource,
+                callback: close
+            }));
+        }
+
+        $(menus[(menus.length - 1)]).remove();
+        menus.pop();
+        $(menus[(menus.length - 1)]).show();
+        $(menus[(menus.length - 1)]).find('.menu-button.active').focus();
+    }
+}
+
+function CloseUI() {
+    for (let i = menus.length - 1; i > 0; i--) {
+        $(menus[i]).remove();
+    }
+
+    $(menus[(menus.length - 1)]).fadeOut();
+    let closeCb = $(menus[(menus.length - 1)]).data('close');
+
+    if (closeCb != null) {
+        $.post('http://mythic_menu/CloseCb', JSON.stringify({
+            resource: calling_resource,
+            callback: closeCb
+        }));
+    }
+
+    $.post('http://mythic_menu/CloseUI', JSON.stringify({}));
+    menus = [];
+    calling_resource = null;
+}
