@@ -17,14 +17,20 @@ function CreateMenu(title, subtitle, optionChange, close)
     return #menus
 end
 
+function RefreshMenu(index)
+    SendNUIMessage({
+        action = "refreshCurrentMenu",
+        data = menus[index]
+    })
+end
+
 function DestroyMenus()
     menus = {}
     SendNUIMessage({
         action = "destroyMenus"
     })
 end
-
-    
+ 
 function AddButton(index, label, data, disabled, select)
     table.insert(menus[index].buttons, {
         type = 1,
@@ -38,6 +44,17 @@ end
 function AddAdvancedButton(index, label, right, data, disabled, select)
     table.insert(menus[index].buttons, {
         type = 4,
+        label = label,
+        right = right,
+        disabled = disabled,
+        data = data,
+        select = select
+    })
+end
+
+function AddStoreButton(index, label, right, data, disabled, select)
+    table.insert(menus[index].buttons, {
+        type = 6,
         label = label,
         right = right,
         disabled = disabled,
@@ -101,7 +118,7 @@ function DisableControls()
         local ped = PlayerPedId()
         while isMenuOpen do
             DisableControlAction(0, 75, true) -- disable exit vehicle
-            DisablePlayerFiring(ped, true) -- Disable weapon firing
+            DisablePlayerFiring(PlayerId(), true) -- Disable weapon firing
             DisableControlAction(0, 24, true) -- disable attack
             DisableControlAction(0, 25, true) -- disable aim
             DisableControlAction(1, 37, true) -- disable weapon select

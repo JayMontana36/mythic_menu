@@ -29,8 +29,8 @@ body, .menus {
     background: transparent;
     width: 500px;
     min-width: 500px;
-    margin-left: auto;
-    margin-right: 1%;
+    margin-right: auto;
+    margin-left: 1%;
     margin-top: 1%;
     display: none;
 }

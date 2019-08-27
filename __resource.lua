@@ -6,13 +6,16 @@ ui_page 'html/ui.html'
 
 client_script { 
     'client/main.lua',
+    --'client/main.js',
 }
 
 exports {
     'CreateMenu',
     'DestroyMenus',
+    'RefreshMenu',
     'AddButton',
     'AddAdvancedButton',
+    'AddStoreButton',
     'AddCheckButton',
     'AddSlider',
     'AddSubMenu',

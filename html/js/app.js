@@ -1,5 +1,7 @@
 var menus = new Array();
 var menuData = new Array();
+var activeMenu = new Array();
+var activeRoot = 0;
 var isMenuOpen = false;
 var calling_resource = null;
 
@@ -15,10 +17,13 @@ window.addEventListener("message", function (event) {
         menus.push($(menuElement));
 
         setupItems(menuData[0]);
+        activeMenu.push(1);
 
         if (menuData[0].closeCb != null) {
             $(menus[(menus.length - 1)]).data('close', menuData[0].closeCb);
         }
+
+        SetActiveRoot(activeRoot);
         
         $(menus[(menus.length - 1)]).show();
     } else if (event.data.action == "destroyMenus") {
@@ -26,7 +31,11 @@ window.addEventListener("message", function (event) {
 
         menus = new Array();
         menuData = new Array();
+        activeMenu = new Array();
         calling_resource = null;
+    } else if (event.data.action == "refreshCurrentMenu") {
+        $(menus[(menus.length - 1)]).find('menu-container').html('');
+        setupItems(event.data.data);
     }
 });
 
@@ -186,6 +195,13 @@ function setupItems(items) {
                         $(element).find('.right').html('<i class="fas fa-check-circle"></i>');
                     }
                     break;
+            case 6:
+                element = $('.templates .advanced.template').clone();
+                $(element).find('.left').html(item.label);
+                if (item.right != null) {
+                    $(element).find('.right').html(item.right);
+                }
+                break;
             case 0:
             // Standard Button
             case 1:
@@ -202,6 +218,7 @@ function setupItems(items) {
         if (item.data != null) {
             if (item.type == 0) {
                 $(element).data('data', menuData[(item.data.index - 1)]);
+                $(element).data('menuId', item.data.index);
             } else {
                 $(element).data('data', item.data);
             }
@@ -230,23 +247,13 @@ function setupItems(items) {
     $(menus[(menus.length - 1)]).find('.menu-button.active').focus();
     $(menus[(menus.length - 1)]).find('.menu-container').animate({ scrollTop: 0 }, "fast");
 
-    if (items.optionCb != null) {
-        let data = $(menus[(menus.length - 1)]).find('.menu-button.active').data('data');
-
-        $.post('http://mythic_menu/MenuOptionChange', JSON.stringify({
-            data: data,
-            resource: calling_resource,
-            callback: items.optionCb
-        }));
-    }
-
     isMenuOpen = true;
 }
 
 function MoveUp() {
     $.post('http://mythic_menu/MenuUpDown', JSON.stringify({}));
 
-    if ($(menus[(menus.length - 1)]).find(".menu-button").not('.disabled').length < 2) { return; }
+    if ($(menus[(menus.length - 1)]).find(".menu-button").not('.disabled').length < 1) { return; }
 
     let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
     let newActive = $(menus[(menus.length - 1)]).find(".menu-button.active").prev('.menu-button');
@@ -281,6 +288,10 @@ function MoveUp() {
         }
     }
 
+    if ((menus.length - 1) === 0) {
+        activeRoot -= 1;
+    }
+
     if (optionChangeCb != null) {
         let data = $(newActive).data('data');
 
@@ -290,15 +301,11 @@ function MoveUp() {
             callback: optionChangeCb
         }));
     }
-
-    curActive = null;
-    newActive = null;
-    optionChangeCb = null;
 }
 
 function MoveDown() {
     $.post('http://mythic_menu/MenuUpDown', JSON.stringify({}));
-    if ($(menus[(menus.length - 1)]).find(".menu-button").not('.disabled').length < 2) { return; }
+    if ($(menus[(menus.length - 1)]).find(".menu-button").not('.disabled').length < 1) { return; }
 
     let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
     let newActive = $(menus[(menus.length - 1)]).find(".menu-button.active").next('.menu-button');
@@ -331,6 +338,10 @@ function MoveDown() {
         }
     }
 
+    if ((menus.length - 1) === 0) {
+        activeRoot += 1;
+    }
+
     if (optionChangeCb != null) {
         let data = $(newActive).data('data');
 
@@ -340,10 +351,6 @@ function MoveDown() {
             callback: optionChangeCb
         }));
     }
-
-    curActive = null;
-    newActive = null;
-    optionChangeCb = null;
 }
 
 function DoLeftAction() {
@@ -420,11 +427,13 @@ function SelectItem() {
         menus.push($('.sub-menu.template').clone());
         $('.menus').append(menus[(menus.length - 1)]);
 
-        if (menuData[0].closeCb != null) {
-            $(menus[(menus.length - 1)]).data('close', menuData[0].closeCb);
+        if (data.closeCb != null) {
+            $(menus[(menus.length - 1)]).data('close', data.closeCb);
         }
 
         setupItems(data);
+
+        activeMenu.push(+$(active).data('menuId'));
 
         $(menus[(menus.length - 2)]).hide()
         $(menus[(menus.length - 1)]).removeClass('template');
@@ -437,12 +446,25 @@ function SelectItem() {
                 $(this).find('.right').html('');
             }
         });
+    } else if (type === 6) {
+        $(active).find('.right').html('OWNED');
+        $(active).addClass('disabled')
+
+        $(menus[(menus.length - 1)]).find('.disabled').each(function() {
+            if (!$(this).hasClass('active')) {
+                let tData = $(this).data('data');
+                $(this).find('.right').html('$' + formatCurrency(tData.item.cost));
+                $(this).removeClass('disabled');
+            }
+        });
     }
 
 
     if (!(type === 0) && !(type === -1)) {
         if (selectCb == null) { return }
         isMenuOpen = false;
+
+        data.activeMenu = activeMenu[(activeMenu.length - 1)]
 
         $.post('http://mythic_menu/SelectItem', JSON.stringify({
             data: data,
@@ -474,6 +496,7 @@ function GoBack() {
 
         $(menus[(menus.length - 1)]).remove();
         menus.pop();
+        activeMenu.pop();
         $(menus[(menus.length - 1)]).show();
         $(menus[(menus.length - 1)]).find('.menu-button.active').focus();
     }
@@ -493,5 +516,25 @@ function CloseUI() {
 
     menus = new Array();
     menuData = new Array();
+    activeMenu = new Array();
     calling_resource = null;
+    activeRoot = 0;
+}
+
+function SetActiveRoot(index) {
+    let curActive = $(menus[(menus.length - 1)]).find(".menu-button.active");
+    let newActive = $(menus[(menus.length - 1)]).find(".menu-button").eq( index );
+
+    $(curActive).removeClass('active');
+    $(newActive).addClass('active');
+
+    if ($(newActive).data('type') == 2) {
+        $(newActive).find('input').focus();
+    } else {
+        $(newActive).focus();
+    }
+}
+
+function formatCurrency(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
