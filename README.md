@@ -64,3 +64,5 @@ end
 ```
 
 >NOTE: The above is a single function from my LS Customs Script, please don't expect it to work. If it's not released on our Github yet please don't ask for the full script.
+
+>NOTE: Yes, there is a JS client file. I was looking to see what sort of overhead there was using JS for the client stuff opposed to the LUA. From the bit of testing it was a significant overhead compared to the LUA implementation so I did abandon it. Left it for the sake of having it in case I change my mind down the road.
