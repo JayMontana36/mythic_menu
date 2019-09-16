@@ -25,7 +25,7 @@ exports {
 
 files {
     'html/ui.html',
-    'html/css/style.css',
+    'html/css/style.min.css',
     'html/js/app.js',
 
     'html/libs/bootstrap.min.css',

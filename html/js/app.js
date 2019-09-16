@@ -453,7 +453,7 @@ function SelectItem() {
         $(menus[(menus.length - 1)]).find('.disabled').each(function() {
             if (!$(this).hasClass('active')) {
                 let tData = $(this).data('data');
-                $(this).find('.right').html('$' + formatCurrency(tData.item.cost));
+                $(this).find('.right').html('$' + formatCurrency(tData.item.price));
                 $(this).removeClass('disabled');
             }
         });

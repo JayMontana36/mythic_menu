@@ -1,3 +1,10 @@
+$primary: #8b1014;
+$primary-dark: #50080a;
+$secondary: #1e1e1e;
+$accent: #aeaeae;
+$accent-dark: #646464;
+$white: #ffffff;
+
 body, .menus {
     background-color: transparent !important;
     width: 100vw;
@@ -12,12 +19,12 @@ body, .menus {
 
 .menu-container::-webkit-scrollbar {
     width: 5px;
-    background-color: #000000;
+    background-color: $secondary;
 }
 
 .menu-container::-webkit-scrollbar-thumb {
-    background-color: #ff0000;
-    border: 2px solid #ff0000;
+    background-color: $white;
+    border: 2px solid $white;
 }
 
 .template {
@@ -27,8 +34,8 @@ body, .menus {
 .menu, .sub-menu {
     padding: 15px;
     background: transparent;
-    width: 500px;
-    min-width: 500px;
+    width: 550px;
+    min-width: 550px;
     margin-right: auto;
     margin-left: 1%;
     margin-top: 1%;
@@ -36,28 +43,20 @@ body, .menus {
 }
 
 .menu-header {
-    background-color: #ff0000;
-    color: #fff;
+    background-color: $primary;
+    color: $white;
     padding: 25px;
-    background-size: 30px 30px;
-    background-image: linear-gradient(135deg, rgba(0, 0, 0, .20) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, .20) 50%, rgba(0, 0, 0, .20) 75%, transparent 75%, transparent);
-    animation: animate-stripes 3s linear infinite;
-    -webkit-animation: animate-stripes 3s linear infinite;
     transition: width 0.3s;
+    -webkit-transition-timing-function: ease-out;
     transition-timing-function: ease-out;
     text-align: center;
+    font-size: 30px;
     font-weight: 900;
-    /*margin-bottom: 15px;*/
-    border: 5px solid #000000;
-    font-size: 25px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
 }
 
 .menu-sub-header {
-    background: #000000;
-    color: #ffffff;
+    background: $secondary;
+    color: $white;
     padding: 10px;
     text-align: center;
     font-weight: 900;
@@ -85,36 +84,36 @@ body, .menus {
     max-height: 500px;
     overflow: scroll;
     overflow-x: hidden;
-    border-bottom: 5px solid #000000;
+    border-bottom: 5px solid $secondary;
 }
 
 .menu-button {
-    padding: 10px;
-    background-color:#ffffff;
-    width: 465px;
+    padding: 15px;
+    background-color: $white;
+    width: 515px;
     /*text-align: center;*/
-    border: 1px solid #000000;
-    border-left: 5px solid #000000;
+    border: 1px solid $secondary;
+    border-left: 5px solid $secondary;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 900;
-    color: #000000;
+    color: $secondary;
 }
 
 .active {
-    background-color: #ff0000;
-    color: #ffffff;
+    background-color: $primary;
+    color: $white;
 }
 
 .disabled {
-    background-color: #292929;
-    color: #b1b1b1;
+    background-color: $secondary;
+    color: $white;
 }
 
 .disabled.active {
-    background-color: #747474;
-    color: #b1b1b1;
+    background-color: $accent;
+    color: #000000;
 }
 
 .menu-button:focus {
@@ -137,12 +136,12 @@ body, .menus {
 
 .right .curr-index, .right .max-index {
     display: inline;
-    color: #000000;
+    color: $white;
     font-weight: bold;
 }
 
 .active .right .curr-index, .active .right .max-index {
-    color: #ffffff !important;
+    color: $white !important;
 }
 
 input[type=range] {
@@ -157,8 +156,8 @@ input[type=range] {
     -webkit-appearance: none;
     width: 100%;
     padding: 5px;
-    background: #000000;
-    border: 1px solid #000000;
+    background: $white;
+    border: 1px solid $white;
     outline: none;
     /*opacity: 0.7;*/
     -webkit-transition: .2s;
@@ -174,14 +173,14 @@ input[type=range] {
     appearance: none;
     width: 20px;
     height: 10px;
-    background: #ff0000;
+    background: $primary;
     cursor: pointer;
 }
 
 .slider input[type=range]::-moz-range-thumb {
     width: 20px;
     height: 10px;
-    background: #ff0000;
+    background: $primary;
     cursor: pointer;
 }
 
